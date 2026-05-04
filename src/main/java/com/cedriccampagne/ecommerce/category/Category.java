@@ -1,38 +1,25 @@
-package com.cedriccampagne.ecommerce.user;
+package com.cedriccampagne.ecommerce.category;
 
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 import lombok.*;
 
-
 @Entity
-@Table(name = "users")
+@Table(name = "categories")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-
-// plus lisible à la création ds objets dans les services
-@Builder    
-public class User {
-
+@Builder
+public class Category {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String username;
-
     @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(nullable = false)
-    private String password;
-
-    @Builder.Default
-    @Column(nullable = false)
-    private String role = "USER";
+    private String name;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -40,17 +27,14 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // Executé avant INSERT
     @PrePersist
-    protected void onCreate() {
+    protected void onCreate(){
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Executé avant UPDATE
     @PreUpdate
-    protected void onUpdate() {
+    protected void onUpdate(){
         this.updatedAt = LocalDateTime.now();
     }
 }
- 
