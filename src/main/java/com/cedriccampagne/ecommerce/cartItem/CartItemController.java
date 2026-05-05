@@ -42,6 +42,18 @@ public class CartItemController {
         return cartItemService.getCartItemsByUserId(id);
     }
     
+    // total du panier user
+    @GetMapping("/cart/user/{userId}/total")
+    public CartTotalDto getCartTotalByUserId(@PathVariable Long userId){
+        return cartItemService.getCartTotalByUserId(userId);
+    }
+
+    // Details panier user
+    @GetMapping("/cart/user/{userId}/details")
+    public List<CartItemDetailDto> getCartDetailByUserId(@PathVariable Long userId) {
+        return cartItemService.getCartDetailByUserId(userId);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CartItemDto createCartItem(@Valid @RequestBody CartItemCreateDto dto){
@@ -62,5 +74,20 @@ public class CartItemController {
         cartItemService.deleteCartItem(id);
     }
 
+
+    @DeleteMapping("/user/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCartItemByUserId(@PathVariable Long userId){
+        cartItemService.deleteCartItemByUserId(userId);
+    }
+
+    @DeleteMapping("/user/{userId}/product/{productId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCartItemByUserIdAndProductId(
+        @PathVariable Long userId,
+        @PathVariable Long productId
+    ) {
+        cartItemService.deleteCartItemByUserIdAndProductId(userId, productId);
+    }
 
 }

@@ -5,14 +5,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.cedriccampagne.ecommerce.cartItem.dto.CartItemCreateDto;
+import com.cedriccampagne.ecommerce.cartItem.dto.CartItemDetailDto;
 import com.cedriccampagne.ecommerce.cartItem.dto.CartItemDto;
 import com.cedriccampagne.ecommerce.cartItem.dto.CartItemUpdateDto;
+import com.cedriccampagne.ecommerce.cartItem.dto.CartTotalDto;
 import com.cedriccampagne.ecommerce.user.User;
 import com.cedriccampagne.ecommerce.user.UserRepository;
 
 import com.cedriccampagne.ecommerce.product.Product;
 import com.cedriccampagne.ecommerce.product.ProductRepository;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,6 +52,19 @@ public class CartItemService {
             ));
         
         return CartItemMapper.toCartItemDto(cartItem);
+    }
+
+    public List<CartItemDto> getCartItemsByUserId(Long id){
+        User user = userRepository.findById(id)
+            .orElseThrow(()-> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Utilisateur introuvable"
+            ));
+        
+        return cartItemRepository.findByUserId(user.getId())
+            .stream()
+            .map(CartItemMapper::toCartItemDto)
+            .toList();
     }
 
     public CartItemDto createCartItem(CartItemCreateDto dto){
@@ -111,18 +128,93 @@ public class CartItemService {
         cartItemRepository.delete(cartItem);
     }
 
-    public List<CartItemDto> getCartItemsByUserId(Long id){
+    public void deleteCartItemByUserId(Long id){
         User user = userRepository.findById(id)
             .orElseThrow(()-> new ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "Utilisateur introuvable"
             ));
-        
-        return cartItemRepository.findByUserId(user.getId())
-            .stream()
-            .map(CartItemMapper::toCartItemDto)
-            .toList();
+
+        List<CartItem> items = cartItemRepository.findByUserId(user.getId());
+
+        for (CartItem item : items) {
+            cartItemRepository.deleteById(item.getId());
+        }
     }
 
-    
+    public void deleteCartItemByUserIdAndProductId(Long userId, Long productId){
+        userRepository.findById(userId)
+            .orElseThrow(()-> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Utilisateur introuvable"
+            ));
+
+        productRepository.findById(productId)
+            .orElseThrow(()-> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Produit introuvable"
+            ));
+
+        CartItem cartItem = cartItemRepository.findByUserIdAndProductId(userId, productId)
+            .orElseThrow(()-> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "CartItem introuvable"
+            ));
+
+        cartItemRepository.delete(cartItem);
+    }
+
+    public CartTotalDto getCartTotalByUserId(Long userId){
+        userRepository.findById(userId)
+            .orElseThrow(()-> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Utilisateur introuvable"
+            ));
+
+        List<CartItem> items = cartItemRepository.findByUserId(userId);
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (CartItem item : items) {
+            BigDecimal price = item.getProduct().getPrice();
+            BigDecimal quantity = BigDecimal.valueOf(item.getQuantity());
+
+            BigDecimal lineTotal = price.multiply(quantity);
+            total = total.add(lineTotal);
+        }
+
+        return new CartTotalDto(total);
+    }
+
+    public List<CartItemDetailDto> getCartDetailByUserId(Long userId){
+        userRepository.findById(userId)
+            .orElseThrow(()-> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Utilisateur introuvable"
+            ));
+
+        List<CartItem> items = cartItemRepository.findByUserId(userId);
+
+        List<CartItemDetailDto> details = new ArrayList<>();
+        
+        for (CartItem item : items) {
+            Long productId = item.getProduct().getId();
+            String productName = item.getProduct().getName();
+            BigDecimal price = item.getProduct().getPrice();
+            int quantity = item.getQuantity();
+            BigDecimal lineTotal = price.multiply(BigDecimal.valueOf(quantity));
+
+            CartItemDetailDto dto = new CartItemDetailDto(
+                productId,
+                productName,
+                price,
+                quantity,
+                lineTotal
+            );
+            
+            details.add(dto);
+        }
+
+        return details;
+    }
 }
