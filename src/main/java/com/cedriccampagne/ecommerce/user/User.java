@@ -1,6 +1,11 @@
 package com.cedriccampagne.ecommerce.user;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.cedriccampagne.ecommerce.cartItem.CartItem;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -40,6 +45,11 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    @Builder.Default
+    private List<CartItem> cartItems = new ArrayList<>();
+    
     // Executé avant INSERT
     @PrePersist
     protected void onCreate() {

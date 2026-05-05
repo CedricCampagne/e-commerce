@@ -65,6 +65,14 @@
     - 1 user → N-  cart_items
     - 1 product     → N cart_items
 
+CartItem = une ligne du panier
+
+User a 1 panier = liste de CartItems
+
+CartItem = user + product + quantity
+
+Pas de table Cart
+
 ### 5. Table : orders
 
 | Champ        | Type              | Description                     |
