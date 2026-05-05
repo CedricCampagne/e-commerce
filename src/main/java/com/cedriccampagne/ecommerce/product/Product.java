@@ -1,23 +1,21 @@
-package com.cedriccampagne.ecommerce.category;
+package com.cedriccampagne.ecommerce.product;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-import com.cedriccampagne.ecommerce.product.Product;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.cedriccampagne.ecommerce.category.Category;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "products")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Category {
+public class Product {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,17 +24,27 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Column(nullable = false, columnDefinition = "TEXT" )
+    private String description;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
+
+    @Column(nullable = false)
+    private Integer stock;
+
+    @Column(name = "image_url", nullable = false, columnDefinition = "TEXT")
+    private String imageUrl;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    @OneToMany(mappedBy = "category")   // mappedBy = "category" correspond au nom du champ dans Product :
-    @JsonIgnore 
-    // la liste n’est jamais null, même si on utilise le builder, elle est initialisée
-    @Builder.Default
-    private List<Product> products = new ArrayList<>();
 
     @PrePersist
     protected void onCreate(){
@@ -48,4 +56,5 @@ public class Category {
     protected void onUpdate(){
         this.updatedAt = LocalDateTime.now();
     }
+
 }
