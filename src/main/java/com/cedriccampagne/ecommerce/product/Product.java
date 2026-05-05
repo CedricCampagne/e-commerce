@@ -2,8 +2,12 @@ package com.cedriccampagne.ecommerce.product;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.cedriccampagne.ecommerce.cartItem.CartItem;
 import com.cedriccampagne.ecommerce.category.Category;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,6 +49,11 @@ public class Product {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "product")
+    @JsonIgnore
+    @Builder.Default
+    private List<CartItem>cartItems = new ArrayList<>();
 
     @PrePersist
     protected void onCreate(){
