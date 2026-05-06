@@ -13,5 +13,5 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     // Très utile pour éviter les doublons dans le panier
     // Exemple : si le user ajoute 2 fois le même produit, tu incrémentes la quantité au lieu de créer une nouvelle ligne
     Optional<CartItem> findByUserIdAndProductId(Long userId, Long productId);
-
+    void deleteByUserId(Long userId);
 }
