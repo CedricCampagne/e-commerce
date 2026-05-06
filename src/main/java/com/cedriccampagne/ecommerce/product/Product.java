@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.cedriccampagne.ecommerce.cartItem.CartItem;
 import com.cedriccampagne.ecommerce.category.Category;
+import com.cedriccampagne.ecommerce.orderItem.OrderItem;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
@@ -54,6 +55,11 @@ public class Product {
     @JsonIgnore
     @Builder.Default
     private List<CartItem>cartItems = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product")
+    @JsonIgnore
+    @Builder.Default
+    private List<OrderItem> orderItems = new ArrayList<>();
 
     @PrePersist
     protected void onCreate(){
