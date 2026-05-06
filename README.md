@@ -1,126 +1,132 @@
-# Projet E‑Commerce API – Spring Boot / PostgreSQL / Flyway
+# E‑Commerce API – Spring Boot / PostgreSQL / Flyway
 
-API backend construite avec Spring Boot, PostgreSQL, Flyway et une architecture propre en couches (Entity → Repository → Service → Controller).
-Objectif : créer une base solide pour un projet e‑commerce complet.
+API backend e‑commerce construite avec Spring Boot, PostgreSQL et Flyway.  
+Le projet suit une architecture professionnelle en couches (Entity => Repository => Service => Controller)   
+et implémente les fonctionnalités essentielles d’un vrai backend e‑commerce.
 
-## Installation & Lancement du projet
+Objectif : **monter en compétences backend Java/Spring** et produire un projet propre, structuré et réaliste pour mes futures candidatures.
 
-### Prérequis
+## Fonctionnalités
 
-Avant de lancer le projet, assure‑toi d’avoir installé :
-- Java 17+
-- Maven 3.8+
-- PostgreSQL 14+
-- Un IDE (IntelliJ, VS Code, Eclipse…)
+[x] Gestion des utilisateurs
 
-### 1. Cloner le projet
+[x] Gestion des catégories
 
-```bash
-git clone https://github.com/<ton-user>/<ton-repo>.git
-cd <ton-repo>
-```
+[x] Gestion des produits
 
-### 2. Créer le fichier ``.env``
+[x] Panier utilisateur (CartItem)
 
-Le fichier ``.env`` n’est pas versionné (présent dans .gitignore).
+[x] Création de commande (Order + OrderItem)
 
-Crée‑le à la racine du projet :
+[ ] Authentification JWT
 
-```bash
-DB_URL=jdbc:postgresql://localhost:5432/ecommerce
-DB_USER=postgres
-DB_PASSWORD=ton_mot_de_passe
-```
+[ ] Documentation Swagger
 
-### 3. Créer la base PostgreSQL
+[ ] Tests unitaires
 
-Dans PgAdmin ou en ligne de commande :
+[ ] Docker / Déploiement
 
-```sql
-CREATE DATABASE ecommerce;
-```
+## Endpoints principaux
 
-Aucune table à créer manuellement :
-- Flyway s’en charge automatiquement au démarrage.
+### Produits
 
-## 4. Vérifier la configuration Spring Boot
+- GET /products
+- GET /products/{id}
 
-Le fichier application.yml doit contenir :
+### Panier
 
-```yaml
-spring:
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
+- GET /cart/user/{userId}
+- POST /cart/user/{userId}/add
+- DELETE /cart/user/{userId}/{productId}
 
-  jpa:
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
+### Commandes
 
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-```
+- POST /orders/user/{userId} => crée une commande à partir du panier
+- GET /orders/{id}
+- GET /orders/user/{userId}
 
-## 5. Lancer le projet
-
-Avec Maven :
+## Architecture du projet
 
 ```bash
-mvn spring-boot:run
+src/
+ └── main/
+     ├── java/com.cedriccampagne.ecommerce/
+     │    ├── user/
+     │    ├── category/
+     │    ├── product/
+     │    ├── cartItem/
+     │    ├── order/
+     │    ├── orderItem/
+     │    ├── dto/
+     │    ├── mapper/
+     │    └── config/
+     └── resources/
+          ├── application.yml
+          └── db/migration/
 ```
 
-Ou depuis ton IDE (Run → DemoApplication).
+### Modules
 
-## 6. Vérification Flyway
+- User
 
-Au premier lancement :
-- Flyway lit les migrations dans ``src/main/resources/db/migration``
-- Exécute les fichiers ``V1__...sql`` à ``V6__...sql``
-- Crée automatiquement toutes les tables
-- Ajoute l’historique dans flyway_schema_history
+Gestion des comptes utilisateurs (email, password hash, rôle).
 
-Tu peux vérifier dans PgAdmin que les tables sont bien créées.
+- Category
 
-## Stack Technique
-- Java 17+
+Catégories de produits.
+
+- Product
+
+Catalogue produits (nom, description, prix, stock…).
+
+- CartItem
+
+Représente une ligne du panier.  
+Pas d’entité “Cart” => le panier = liste de CartItem par user.
+
+- Order / OrderItem
+
+Snapshot du panier au moment de l’achat :
+  - Order = commande
+  - OrderItem = lignes de commande figées (prix au moment de l’achat)
+
+## Stack technique
+
+- Java 17
 - Spring Boot
-    - Spring Web
-    - Spring Data JPA
+- Spring Web
+- Spring Data JPA
 - PostgreSQL
 - Flyway (migrations SQL versionnées)
 - Lombok
 - Maven
 
-## Base de données & Migrations
-Le projet utilise Flyway pour gérer la structure de la base.
+## Roadmap
 
-- Migrations disponibles
-    - V1__create_users.sql
-    - V2__create_categories.sql
-    - V3__create_products.sql
-    - V4__create_cart_items.sql
-    - V5__create_orders.sql
-    - V6__create_order_items.sql
+[x] Panier
 
-À chaque démarrage, Flyway vérifie la table :
+[x] Commandes
+
+[ ] Authentification JWT
+
+[ ] Swagger / OpenAPI
+
+[ ] Tests unitaires
+
+[ ] Docker
+
+[ ] Déploiement (Railway / Render / VPS)
+
+## Installation rapide
+
+1. Cloner le projet
 
 ```bash
-flyway_schema_history
+git clone https://github.com/<user>/<repo>.git
+cd <repo>
 ```
 
-et exécute automatiquement les migrations manquantes.
-
-## Variables d’environnement
-
-Le projet utilise un fichier ``.env`` (non commité) pour stocker les secrets.
-
-Exemple :
+2. Créer un fichier .env à la racine
 
 ```bash
 DB_URL=jdbc:postgresql://localhost:5432/ecommerce
@@ -128,71 +134,21 @@ DB_USER=postgres
 DB_PASSWORD=motdepasse
 ```
 
-Chargement automatique dans DemoApplication.java.
+3. Créer la base PostgreSQL
 
-## Configuration Spring Boot
-
-Extrait du ``application.yml`` :
-
-```yaml
-spring:
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
-
-  jpa:
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
-
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
+```sql
+CREATE DATABASE ecommerce;
 ```
 
-## Architecture du projet
+4. Lancer l’application
 
 ```bash
-src/
- └── main/
-     ├── java/com.example.demo/
-     │    ├── entity/
-     │    ├── repository/
-     │    ├── service/
-     │    └── controller/
-     └── resources/
-          ├── application.yml
-          └── db/migration/
+mvn spring-boot:run
 ```
 
-## État actuel du projet
+Flyway crée automatiquement toutes les tables au démarrage.
 
-- [x] Configuration PostgreSQL
+## À propos
 
-- [x] Intégration Flyway
-
-- [x] Migrations V1 → V6
-
-- [x] Chargement des variables d’environnement
-
-- [ ] Entité User
-
-- [ ] Entité Category
-
-- [ ] Entité Product
-
-- [ ] Services & Controllers
-
-- [ ] Authentification JWT
-
-- [ ] Documentation API (Swagger)
-
-## À propos du développeur
-
-Projet réalisé dans le cadre de ma montée en compétences backend après une formation **DWWM**.
-Objectif : renforcer mes compétences Java/Spring pour mes futures candidatures.
-
+Projet réalisé dans le cadre de ma montée en compétences backend après une formation DWWM.  
+Objectif : viser un poste développeur backend Java junior en maîtrisant Spring Boot, PostgreSQL, Flyway et les bonnes pratiques d’architecture.  
