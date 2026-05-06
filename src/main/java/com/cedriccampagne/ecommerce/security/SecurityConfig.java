@@ -1,4 +1,4 @@
-package com.cedriccampagne.ecommerce.config;
+package com.cedriccampagne.ecommerce.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
