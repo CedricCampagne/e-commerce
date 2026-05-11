@@ -10,11 +10,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cedriccampagne.ecommerce.common.pagination.PaginationResponse;
 import com.cedriccampagne.ecommerce.product.dto.ProductCreateDto;
 import com.cedriccampagne.ecommerce.product.dto.ProductDto;
+import com.cedriccampagne.ecommerce.product.dto.ProductListDto;
 import com.cedriccampagne.ecommerce.product.dto.ProductUpdateDto;
 
 import jakarta.validation.Valid;
@@ -30,8 +33,12 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductDto> getAllProducts(){
-        return productService.getAllProducts();
+    public PaginationResponse<ProductListDto> getAllProducts(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "createdAt,desc") String sort
+    ){
+        return productService.getAllProducts(page, size, sort);
     }
 
     @GetMapping("/{id}")
