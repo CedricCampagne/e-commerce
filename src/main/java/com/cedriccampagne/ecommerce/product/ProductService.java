@@ -30,20 +30,14 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
-    // public List<ProductDto> getAllProducts(){
-    //     return productRepository.findAll()
-    //         .stream()
-    //         .map(ProductMapper::toProductDto)
-    //         .toList();
-    // }
-
     public PaginationResponse<ProductListDto> getAllProducts(
         int page,
         int size,
         String sort,
         Long categoryId,
         BigDecimal minPrice,
-        BigDecimal maxPrice
+        BigDecimal maxPrice,
+        String search
         ){
 
         String[] sortParams = sort.split(",");
@@ -65,15 +59,38 @@ public class ProductService {
         // Filtre par catégorie si fourni
         Page<Product> result;
 
-        if (categoryId != null && minPrice != null && maxPrice != null) {
+        // 1) Search + catégorie + prix
+        if (search != null && categoryId != null && minPrice != null && maxPrice != null) {
+            result = productRepository.findByNameContainingIgnoreCaseAndCategoryIdAndPriceBetween(
+                    search, categoryId, minPrice, maxPrice, pageable);
+        }
+        // 2) Search + catégorie
+        else if (search != null && categoryId != null) {
+            result = productRepository.findByNameContainingIgnoreCaseAndCategoryId(
+                    search, categoryId, pageable);
+        }
+        // 3) Search + prix
+        else if (search != null && minPrice != null && maxPrice != null) {
+            result = productRepository.findByNameContainingIgnoreCaseAndPriceBetween(
+                    search, minPrice, maxPrice, pageable);
+        }
+        // 4) Search seul
+        else if (search != null) {
+            result = productRepository.findByNameContainingIgnoreCase(search, pageable);
+        }
+        // 5) Catégorie + prix
+        else if (categoryId != null && minPrice != null && maxPrice != null) {
             result = productRepository.findByCategoryIdAndPriceBetween(categoryId, minPrice, maxPrice, pageable);
         }
+        // 6) Prix seul
         else if (minPrice != null && maxPrice != null) {
             result = productRepository.findByPriceBetween(minPrice, maxPrice, pageable);
         }
+        // 7) Catégorie seule
         else if (categoryId != null) {
             result = productRepository.findByCategoryId(categoryId, pageable);
         }
+        // 8) Aucun filtre
         else {
             result = productRepository.findAll(pageable);
         }

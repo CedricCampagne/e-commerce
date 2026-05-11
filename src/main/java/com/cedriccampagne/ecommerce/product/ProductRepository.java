@@ -22,5 +22,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         Pageable pageable
     );
 
-    
+    Page<Product> findByNameContainingIgnoreCase(String keyword, Pageable pageable);
+    Page<Product> findByNameContainingIgnoreCaseAndPriceBetween(String keyword,BigDecimal min, BigDecimal max, Pageable pageable);
+    Page<Product> findByNameContainingIgnoreCaseAndCategoryId(String keyword, Long categoryId, Pageable pageable);
+    Page<Product> findByNameContainingIgnoreCaseAndCategoryIdAndPriceBetween(String keyword,Long CategoryId, BigDecimal min, BigDecimal max, Pageable pageable);
 }

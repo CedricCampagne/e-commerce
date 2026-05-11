@@ -40,7 +40,8 @@ public class ProductController {
         @RequestParam(defaultValue = "createdAt,desc") String sort,
         @RequestParam(required = false) Long category,
         @RequestParam(defaultValue = "0") BigDecimal minPrice,
-         @RequestParam(defaultValue = "999999") BigDecimal maxPrice
+        @RequestParam(defaultValue = "999999") BigDecimal maxPrice,
+        @RequestParam(required = false) String search
     ){
         return productService.getAllProducts(
             page,
@@ -48,7 +49,8 @@ public class ProductController {
             sort,
             category,
             minPrice,
-            maxPrice
+            maxPrice,
+            search
         );
     }
 
