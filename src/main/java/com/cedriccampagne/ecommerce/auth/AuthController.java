@@ -1,11 +1,13 @@
 package com.cedriccampagne.ecommerce.auth;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cedriccampagne.ecommerce.auth.dto.AuthResponse;
+import com.cedriccampagne.ecommerce.auth.dto.MeRespone;
 import com.cedriccampagne.ecommerce.auth.dto.LoginRequest;
 import com.cedriccampagne.ecommerce.auth.dto.RegisterRequest;
 
@@ -29,5 +31,10 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @GetMapping("/me")
+    public MeRespone me(){
+        return authService.me();
     }
 }

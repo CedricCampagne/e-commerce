@@ -3,13 +3,15 @@ package com.cedriccampagne.ecommerce.auth;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.cedriccampagne.ecommerce.auth.dto.AuthResponse;
 import com.cedriccampagne.ecommerce.auth.dto.RegisterRequest;
 import com.cedriccampagne.ecommerce.security.JwtService;
 import com.cedriccampagne.ecommerce.auth.dto.LoginRequest;
-
+import com.cedriccampagne.ecommerce.auth.dto.MeRespone;
 import com.cedriccampagne.ecommerce.user.User;
 import com.cedriccampagne.ecommerce.user.UserRepository;
 
@@ -75,6 +77,23 @@ public class AuthService  {
 
         return new AuthResponse(
             token,
+            user.getEmail(),
+            user.getRole()
+        );
+    }
+
+    public MeRespone me(){
+        // var laisse JAVA déterminer automatiquement le type excate de la variable
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication == null || authentication.getPrincipal() == "anonymusUser") {
+            throw new RuntimeException("Utilisateur non authentifié");
+        }
+
+        // cast User : Je sais que c’est un User, donc je le cast.
+        User user = (User) authentication.getPrincipal();
+
+        return new MeRespone(
             user.getEmail(),
             user.getRole()
         );
