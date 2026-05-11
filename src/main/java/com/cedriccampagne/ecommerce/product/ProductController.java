@@ -41,7 +41,8 @@ public class ProductController {
         @RequestParam(required = false) Long category,
         @RequestParam(defaultValue = "0") BigDecimal minPrice,
         @RequestParam(defaultValue = "999999") BigDecimal maxPrice,
-        @RequestParam(required = false) String search
+        @RequestParam(required = false) String search,
+        @RequestParam(required = false) Boolean inStock
     ){
         return productService.getAllProducts(
             page,
@@ -50,7 +51,8 @@ public class ProductController {
             category,
             minPrice,
             maxPrice,
-            search
+            search,
+            inStock
         );
     }
 

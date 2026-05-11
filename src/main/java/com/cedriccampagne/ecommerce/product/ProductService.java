@@ -37,7 +37,8 @@ public class ProductService {
         Long categoryId,
         BigDecimal minPrice,
         BigDecimal maxPrice,
-        String search
+        String search,
+        Boolean inStock
         ){
 
         String[] sortParams = sort.split(",");
@@ -55,45 +56,95 @@ public class ProductService {
             sorting
         );
 
-
-        // Filtre par catégorie si fourni
+        
         Page<Product> result;
 
-        // 1) Search + catégorie + prix
-        if (search != null && categoryId != null && minPrice != null && maxPrice != null) {
-            result = productRepository.findByNameContainingIgnoreCaseAndCategoryIdAndPriceBetween(
-                    search, categoryId, minPrice, maxPrice, pageable);
+        boolean stockFilter = (inStock != null && inStock);
+
+        // 1) Search + catégorie + prix + stock
+        if (stockFilter && search != null && categoryId != null && minPrice != null && maxPrice != null) {
+            result = productRepository.findByStockGreaterThanAndNameContainingIgnoreCaseAndCategoryIdAndPriceBetween(
+                0, search, categoryId, minPrice, maxPrice, pageable);
         }
-        // 2) Search + catégorie
+        // 2) Search + catégorie + prix
+        else if (search != null && categoryId != null && minPrice != null && maxPrice != null) {
+            result = productRepository.findByNameContainingIgnoreCaseAndCategoryIdAndPriceBetween(
+                search, categoryId, minPrice, maxPrice, pageable);
+        }
+
+        // 3) Search + catégorie + stock
+        else if (stockFilter && search != null && categoryId != null) {
+            result = productRepository.findByStockGreaterThanAndNameContainingIgnoreCaseAndCategoryId(
+                0, search, categoryId, pageable);
+        }
+        // 4) Search + catégorie
         else if (search != null && categoryId != null) {
             result = productRepository.findByNameContainingIgnoreCaseAndCategoryId(
-                    search, categoryId, pageable);
+                search, categoryId, pageable);
         }
-        // 3) Search + prix
+
+        // 5) Search + prix + stock
+        else if (stockFilter && search != null && minPrice != null && maxPrice != null) {
+            result = productRepository.findByStockGreaterThanAndNameContainingIgnoreCaseAndPriceBetween(
+                0, search, minPrice, maxPrice, pageable);
+        }
+        // 6) Search + prix
         else if (search != null && minPrice != null && maxPrice != null) {
             result = productRepository.findByNameContainingIgnoreCaseAndPriceBetween(
-                    search, minPrice, maxPrice, pageable);
+                search, minPrice, maxPrice, pageable);
         }
-        // 4) Search seul
+
+        // 7) Search + stock
+        else if (stockFilter && search != null) {
+            result = productRepository.findByStockGreaterThanAndNameContainingIgnoreCase(
+                0, search, pageable);
+        }
+        // 8) Search seul
         else if (search != null) {
             result = productRepository.findByNameContainingIgnoreCase(search, pageable);
         }
-        // 5) Catégorie + prix
+
+        // 9) Catégorie + prix + stock
+        else if (stockFilter && categoryId != null && minPrice != null && maxPrice != null) {
+            result = productRepository.findByStockGreaterThanAndCategoryIdAndPriceBetween(
+                0, categoryId, minPrice, maxPrice, pageable);
+        }
+        // 10) Catégorie + prix
         else if (categoryId != null && minPrice != null && maxPrice != null) {
-            result = productRepository.findByCategoryIdAndPriceBetween(categoryId, minPrice, maxPrice, pageable);
+            result = productRepository.findByCategoryIdAndPriceBetween(
+                categoryId, minPrice, maxPrice, pageable);
         }
-        // 6) Prix seul
-        else if (minPrice != null && maxPrice != null) {
-            result = productRepository.findByPriceBetween(minPrice, maxPrice, pageable);
+
+        // 11) Catégorie + stock
+        else if (stockFilter && categoryId != null) {
+            result = productRepository.findByStockGreaterThanAndCategoryId(
+                0, categoryId, pageable);
         }
-        // 7) Catégorie seule
+        // 12) Catégorie seule
         else if (categoryId != null) {
             result = productRepository.findByCategoryId(categoryId, pageable);
         }
-        // 8) Aucun filtre
+
+        // 13) Prix + stock
+        else if (stockFilter && minPrice != null && maxPrice != null) {
+            result = productRepository.findByStockGreaterThanAndPriceBetween(
+                0, minPrice, maxPrice, pageable);
+        }
+        // 14) Prix seul
+        else if (minPrice != null && maxPrice != null) {
+            result = productRepository.findByPriceBetween(minPrice, maxPrice, pageable);
+        }
+
+        // 15) Stock seul
+        else if (stockFilter) {
+            result = productRepository.findByStockGreaterThan(0, pageable);
+        }
+
+        // 16) Aucun filtre
         else {
             result = productRepository.findAll(pageable);
         }
+
 
         // Mapper en ProductListDto
         List<ProductListDto> items = result.getContent()
