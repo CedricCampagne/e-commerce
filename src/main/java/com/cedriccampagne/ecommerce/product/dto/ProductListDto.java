@@ -7,5 +7,7 @@ public record ProductListDto (
     String name,
     String imageUrl,
     BigDecimal price,
-    Integer stock
+    Integer stock,
+    Long categoryId,
+    String categoryName
 ) {}

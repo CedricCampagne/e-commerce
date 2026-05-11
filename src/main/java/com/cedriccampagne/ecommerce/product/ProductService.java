@@ -1,5 +1,6 @@
 package com.cedriccampagne.ecommerce.product;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -36,11 +37,18 @@ public class ProductService {
     //         .toList();
     // }
 
-    public PaginationResponse<ProductListDto> getAllProducts(int page, int size, String sort){
+    public PaginationResponse<ProductListDto> getAllProducts(
+        int page,
+        int size,
+        String sort,
+        Long categoryId,
+        BigDecimal minPrice,
+        BigDecimal maxPrice
+        ){
 
         String[] sortParams = sort.split(",");
         String sortField = sortParams[0];
-        String sortDirection = sortParams[1];
+        String sortDirection = sortParams.length > 1 ? sortParams[1] : "asc";
 
         Sort sorting = sortDirection.equalsIgnoreCase("desc")
             ? Sort.by(sortField).descending()
@@ -53,8 +61,22 @@ public class ProductService {
             sorting
         );
 
-        // Appek=ler repo avec pagination
-        Page<Product> result = productRepository.findAll(pageable);
+
+        // Filtre par catégorie si fourni
+        Page<Product> result;
+
+        if (categoryId != null && minPrice != null && maxPrice != null) {
+            result = productRepository.findByCategoryIdAndPriceBetween(categoryId, minPrice, maxPrice, pageable);
+        }
+        else if (minPrice != null && maxPrice != null) {
+            result = productRepository.findByPriceBetween(minPrice, maxPrice, pageable);
+        }
+        else if (categoryId != null) {
+            result = productRepository.findByCategoryId(categoryId, pageable);
+        }
+        else {
+            result = productRepository.findAll(pageable);
+        }
 
         // Mapper en ProductListDto
         List<ProductListDto> items = result.getContent()
@@ -143,6 +165,4 @@ public class ProductService {
 
         productRepository.delete(product);
     }
-
-    
 }

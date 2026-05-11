@@ -1,5 +1,6 @@
 package com.cedriccampagne.ecommerce.product;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -36,9 +37,19 @@ public class ProductController {
     public PaginationResponse<ProductListDto> getAllProducts(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
-        @RequestParam(defaultValue = "createdAt,desc") String sort
+        @RequestParam(defaultValue = "createdAt,desc") String sort,
+        @RequestParam(required = false) Long category,
+        @RequestParam(defaultValue = "0") BigDecimal minPrice,
+         @RequestParam(defaultValue = "999999") BigDecimal maxPrice
     ){
-        return productService.getAllProducts(page, size, sort);
+        return productService.getAllProducts(
+            page,
+            size,
+            sort,
+            category,
+            minPrice,
+            maxPrice
+        );
     }
 
     @GetMapping("/{id}")
