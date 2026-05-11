@@ -6,7 +6,6 @@ import com.cedriccampagne.ecommerce.user.User;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 
 import java.util.Date;
 import java.util.Base64;
@@ -40,18 +39,24 @@ public class JwtService {
             .compact();
     }
 
-    public boolean validateToken(String token){
-        try {
-            Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token);
-
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    public boolean isTokenValid(String token, User user) {
+        final String email = extractEmail(token);
+        return (email.equals(user.getEmail()) && !isTokenExpired(token));
     }
+
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(String token) {
+        return Jwts.parserBuilder()
+            .setSigningKey(getSigningKey())
+            .build()
+            .parseClaimsJws(token)
+            .getBody()
+            .getExpiration();
+    }
+
 
     public String extractEmail(String token) {
         return Jwts.parserBuilder()

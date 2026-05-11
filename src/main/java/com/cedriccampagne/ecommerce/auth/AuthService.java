@@ -1,10 +1,13 @@
 package com.cedriccampagne.ecommerce.auth;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import com.cedriccampagne.ecommerce.auth.dto.AuthResponse;
 import com.cedriccampagne.ecommerce.auth.dto.RegisterRequest;
+import com.cedriccampagne.ecommerce.security.JwtService;
 import com.cedriccampagne.ecommerce.auth.dto.LoginRequest;
 
 import com.cedriccampagne.ecommerce.user.User;
@@ -15,19 +18,28 @@ public class AuthService  {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+
+
 
     public AuthService(
         UserRepository userRepository,
-        PasswordEncoder passwordEncoder
+        PasswordEncoder passwordEncoder,
+        JwtService jwtService,
+        AuthenticationManager authenticationManager
+        
     ){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
     }
 
     public AuthResponse register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.email())) {
-            return new AuthResponse("Email déjà utilisé");
+            return new AuthResponse(null, null, null);
         }
 
         User user = User.builder()
@@ -38,21 +50,33 @@ public class AuthService  {
 
         userRepository.save(user);
 
-        return new AuthResponse("Utilisateur créé avec succès : " + user.getUsername());
+
+        return new AuthResponse(
+            null,
+            null,
+            null
+        );
     }
 
     public AuthResponse login(LoginRequest request){
+        
+        //1 Laisser Spring vérifier email + password
+        authenticationManager.authenticate(
+            //objet qui représente une tentative d’authentification
+            new UsernamePasswordAuthenticationToken(request.email(), request.password())
+        );
+
+        // 2) Si on arrive ici = email + password sont corrects
+        // On charge l'utilisateur depuis la base
         User user = userRepository.findByEmail(request.email())
-            .orElseThrow(null);
+            .orElseThrow(()-> new RuntimeException("Utilisateur introuvable"));
 
-        if(user == null) {
-            return new AuthResponse("Identifiants invalides");
-        }
+        String token = jwtService.generateToken(user);
 
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            return new AuthResponse("Identifiants invalides");
-        }
-
-        return new AuthResponse("Connexion réussie : " + user.getUsername());
+        return new AuthResponse(
+            token,
+            user.getEmail(),
+            user.getRole()
+        );
     }
 }
