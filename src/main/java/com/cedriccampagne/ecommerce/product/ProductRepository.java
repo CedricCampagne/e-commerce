@@ -1,14 +1,46 @@
 package com.cedriccampagne.ecommerce.product;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
+import java.math.BigDecimal;
 import java.util.List;
+
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     
     //Méthodes custopn si besoins
-    List<Product> findByCategoryId(Long categoryId);
+    Page<Product> findByCategoryId(Long categoryId, Pageable page);
+    Page<Product> findByPriceBetween(BigDecimal min, BigDecimal max, Pageable pageable);
+    Page<Product> findByCategoryIdAndPriceBetween(
+        Long categoryId,
+        BigDecimal min,
+        BigDecimal max,
+        Pageable pageable
+    );
+
+    // mots clé et combinaisons
+    Page<Product> findByNameContainingIgnoreCase(String keyword, Pageable pageable);
+    Page<Product> findByNameContainingIgnoreCaseAndPriceBetween(String keyword,BigDecimal min, BigDecimal max, Pageable pageable);
+    Page<Product> findByNameContainingIgnoreCaseAndCategoryId(String keyword, Long categoryId, Pageable pageable);
+    Page<Product> findByNameContainingIgnoreCaseAndCategoryIdAndPriceBetween(String keyword,Long CategoryId, BigDecimal min, BigDecimal max, Pageable pageable);
+
+    // stock dispo et combinaisons
+    Page<Product> findByStockGreaterThan(int stock, Pageable pageable);
+    Page<Product> findByStockGreaterThanAndCategoryId(int stock, Long categoryId, Pageable pageable);
+    Page<Product> findByStockGreaterThanAndPriceBetween(int stock, BigDecimal min, BigDecimal max, Pageable pageable);
+    Page<Product> findByStockGreaterThanAndNameContainingIgnoreCase(
+        int stock, String keyword, Pageable pageable);
+    Page<Product> findByStockGreaterThanAndCategoryIdAndPriceBetween(
+        int stock, Long categoryId, BigDecimal min, BigDecimal max, Pageable pageable);
+    Page<Product> findByStockGreaterThanAndNameContainingIgnoreCaseAndCategoryId(
+        int stock, String keyword, Long categoryId, Pageable pageable);
+    Page<Product> findByStockGreaterThanAndNameContainingIgnoreCaseAndPriceBetween(
+        int stock, String keyword, BigDecimal min, BigDecimal max, Pageable pageable);
+    Page<Product> findByStockGreaterThanAndNameContainingIgnoreCaseAndCategoryIdAndPriceBetween(
+        int stock, String keyword, Long categoryId, BigDecimal min, BigDecimal max, Pageable pageable);
 
 }

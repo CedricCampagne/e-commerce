@@ -51,4 +51,17 @@ public class ProductMapper {
         }
         // Le service gérera dto.categoryId()
     }
+
+    public static ProductListDto toListDto(Product product) {
+        return new ProductListDto(
+            product.getId(),
+            product.getName(),
+            product.getImageUrl(),
+            product.getPrice(),
+            product.getStock(),
+            product.getCategory().getId(),
+            product.getCategory().getName()
+        );
+    }
+    
 }
